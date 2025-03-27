@@ -30,12 +30,23 @@ for results in model.predict(source=2, show=True, stream=True):
         #if int(cls) == 0:
         name = names[int(cls)]
         x1, y1, x2, y2 = [int(i) for i in box.xyxy[0]]
-        # X軸の物体中心位置
-        ObjectXAxisCenter = (x1 + x2) / 2
-        # 画像の左端からの割合
-        PercentFromLeft = (ObjectXAxisCenter / imageWidth) 
-        # 検出情報の表示
-        print(f"Object: {name}, imageWidth={imageWidth}, PercentFromLeft={PercentFromLeft}")
-        ObjectInfo.append(PercentFromLeft)# 配列に追加
-        sortedObjectInfo = sort_by_nearest_to_half(ObjectInfo) # 0.5 との距離を基準に並び替え
-        sendPiData(ObjectInfo) # データを送信
+        ObjectMaxYAxisCenter = y1
+        ObjectMinYAxisCenter = y2
+
+        #画面の大きさによる位置（y軸を計算）
+        PercentMaxYAxis = ObjectMaxYAxisCenter / imageHeight
+        PercentMinYAxis = ObjectMinYAxisCenter / imageHeight
+
+        #画面の大きさによる位置（y軸）が原点が左上にあると考えたとき0.2から0.8の範囲にある場合のみ実行
+        # 懸念点として本当に原点が左上にあるかどうか
+
+        if( PercentMaxYAxis  < 0.8 & PercentMinYAxis > 0.2):
+            # X軸の物体中心位置
+            ObjectXAxisCenter = (x1 + x2) / 2
+            # 画像の左端からの割合
+            PercentFromLeft = (ObjectXAxisCenter / imageWidth) 
+            # 検出情報の表示
+            print(f"Object: {name}, imageWidth={imageWidth}, PercentFromLeft={PercentFromLeft}")
+            ObjectInfo.append(PercentFromLeft)# 配列に追加
+            sortedObjectInfo = sort_by_nearest_to_half(ObjectInfo) # 0.5 との距離を基準に並び替え
+            sendPiData(ObjectInfo) # データを送信
