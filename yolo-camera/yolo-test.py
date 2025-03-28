@@ -1,6 +1,5 @@
 from ultralytics import YOLO
 
-# YOLOv8 モデルの読み込み
 model = YOLO('/home/kk/core-camera/yolo-camera/best-3-26-epochs=500.pt') # モデル .pt までのフルパス(/home/kk~)を入力
 #モデルはこのファイルと同じディレクトリに保存することをお勧めする
 def sort_by_nearest_to_half(arr):
@@ -12,7 +11,10 @@ def sendPiData(data):
     print(data)
 
 # カメラ映像のリアルタイム推論 (source=でカメラ入力)
-for results in model.predict(source=2, show=True, stream=True):
+#imgsz 解像度を指定（32の倍数のみ）
+# conf 信頼度(値以下の物体は検出しない)
+# half 半精度で処理するかどうか(半精度浮動小数の使用)
+for results in model.predict(source=2, show=True, stream=True , imgsz= 512 , conf = 0.5 , half = True):
     # 画像サイズ（高さ, 幅）を取得
     imageHeight, imageWidth = results.orig_shape[:2]
 
@@ -26,8 +28,6 @@ for results in model.predict(source=2, show=True, stream=True):
     for box, cls in zip(boxes, classes):
         num_objects = len(boxes) # 検出された物体の数
 
-        # クラス番号0(person)のみの場合
-        #if int(cls) == 0:
         name = names[int(cls)]
         x1, y1, x2, y2 = [int(i) for i in box.xyxy[0]]
         ObjectMaxYAxisCenter = y1
